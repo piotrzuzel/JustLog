@@ -42,6 +42,7 @@ public final class Logger: NSObject {
     public var enableConsoleLogging: Bool = true
     public var enableFileLogging: Bool = true
     public var enableLogstashLogging: Bool = true
+    public var logstashUsesSelfSignedCertificate: Bool = false
     public let internalLogger = SwiftyBeaver.self
     private var dispatchTimer: Timer?
     
@@ -78,7 +79,7 @@ public final class Logger: NSObject {
         
         // logstash
         if enableLogstashLogging {
-            logstash = LogstashDestination(host: logstashHost, port: logstashPort, timeout: logstashTimeout, logActivity: logLogstashSocketActivity)
+            logstash = LogstashDestination(host: logstashHost, port: logstashPort, timeout: logstashTimeout, logActivity: logLogstashSocketActivity, usesSelfSignedCertificate: logstashUsesSelfSignedCertificate)
             logstash.logzioToken = logzioToken
             internalLogger.addDestination(logstash)
         }

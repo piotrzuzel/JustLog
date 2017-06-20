@@ -19,6 +19,7 @@ public class LogstashDestination: BaseDestination  {
     private let logzioTokenKey = "token"
     
     var logActivity: Bool = false
+    let usesSelfSignedCertificate: Bool
     let logDispatchQueue = OperationQueue()
     var socketManager: AsyncSocketManager!
     
@@ -27,11 +28,12 @@ public class LogstashDestination: BaseDestination  {
         fatalError()
     }
     
-    public required init(host: String, port: UInt16, timeout: TimeInterval, logActivity: Bool) {
+    public required init(host: String, port: UInt16, timeout: TimeInterval, logActivity: Bool, usesSelfSignedCertificate: Bool = false) {
+        self.usesSelfSignedCertificate = usesSelfSignedCertificate
         super.init()
         self.logActivity = logActivity
         self.logDispatchQueue.maxConcurrentOperationCount = 1
-        self.socketManager = AsyncSocketManager(host: host, port: port, timeout: timeout, delegate: self, logActivity: logActivity)
+        self.socketManager = AsyncSocketManager(host: host, port: port, timeout: timeout, delegate: self, logActivity: logActivity, usesSelfSignedCertificate: usesSelfSignedCertificate)
     }
     
     deinit {

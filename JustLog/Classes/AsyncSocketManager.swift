@@ -28,14 +28,16 @@ class AsyncSocketManager: NSObject {
     let host: String
     let port: UInt16
     let timeout: TimeInterval
+    let usesSelfSignedCertificate: Bool
     
     let localSocketQueue = DispatchQueue(label: "com.justeat.gcdAsyncSocketDelegateQueue")
     
-    init(host: String, port: UInt16, timeout: TimeInterval, delegate: AsyncSocketManagerDelegate, logActivity: Bool) {
+    init(host: String, port: UInt16, timeout: TimeInterval, delegate: AsyncSocketManagerDelegate, logActivity: Bool, usesSelfSignedCertificate: Bool) {
         
         self.host = host
         self.port = port
         self.timeout = timeout
+        self.usesSelfSignedCertificate = usesSelfSignedCertificate
         self.delegate = delegate
         self.logActivity = logActivity
         super.init()
@@ -51,7 +53,11 @@ class AsyncSocketManager: NSObject {
                 print("🔌 <AsyncSocket>, Could not startTLS: \(error.localizedDescription)")
             }
         }
-        self.socket.startTLS([String(kCFStreamSSLPeerName): NSString(string: host)])
+        if usesSelfSignedCertificate {
+            self.socket.startTLS([String(GCDAsyncSocketManuallyEvaluateTrust): NSNumber(booleanLiteral: true)])
+        } else {
+            self.socket.startTLS([String(kCFStreamSSLPeerName): NSString(string: host)])
+        }
     }
     
     func write(_ data: Data, withTimeout timeout: TimeInterval, tag: Int) {
@@ -99,6 +105,9 @@ extension AsyncSocketManager {
 extension AsyncSocketManager {
     
     func isSecure() -> Bool {
+        if usesSelfSignedCertificate {
+            return true
+        }
         return self.socket.isSecure
     }
     
@@ -141,5 +150,9 @@ extension AsyncSocketManager: GCDAsyncSocketDelegate {
             }
         }
         self.delegate?.socket(sock, didDisconnectWithError: err)
+    }
+
+    func socket(_ sock: GCDAsyncSocket, didReceive trust: SecTrust, completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(true)
     }
 }
