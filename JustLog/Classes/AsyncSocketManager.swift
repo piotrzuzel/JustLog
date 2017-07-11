@@ -50,7 +50,9 @@ class AsyncSocketManager: NSObject {
             do {
                 _ = try self.connect()
             } catch {
-                print("🔌 <AsyncSocket>, Could not startTLS: \(error.localizedDescription)")
+                if logActivity {
+                    print("🔌 <AsyncSocket>, Could not startTLS: \(error.localizedDescription)")
+                }
             }
         }
         if usesSelfSignedCertificate {
@@ -64,7 +66,9 @@ class AsyncSocketManager: NSObject {
         if self.isSecure() {
             self.socket.write(data, withTimeout: timeout, tag: tag)
         } else {
-            print("🔌 <AsyncSocket>, logstash connection was not secure, could not send logs")
+            if logActivity {
+                print("🔌 <AsyncSocket>, logstash connection was not secure, could not send logs")
+            }
         }
     }
 }
@@ -80,7 +84,9 @@ extension AsyncSocketManager {
         do {
             try self.socket.connect(toHost: host, onPort: port, withTimeout: timeout)
         } catch {
-            print("🔌 <AsyncSocket>, Could not connect: \(error.localizedDescription)")
+            if logActivity {
+                print("🔌 <AsyncSocket>, Could not connect: \(error.localizedDescription)")
+            }
             throw AsyncSocketError.failedConnection
         }
         
